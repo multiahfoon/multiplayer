@@ -23,7 +23,7 @@ import {
 
 import { auth, db } from '../firebase'
 
-import { ARROW_KEYS, playerColors } from '../common/constants'
+import { ARROW_KEYS, PLAYER_COLORS } from '../common/constants'
 
 const Home: NextPage = () => {
   const gameContainer = useRef<any>() // .game-container
@@ -43,11 +43,11 @@ const Home: NextPage = () => {
   }, [])
 
   async function handleColorBtnClick() {
-    const mySkinIndex = playerColors.indexOf(
+    const mySkinIndex = PLAYER_COLORS.indexOf(
       players.current[playerId.current].color
     )
 
-    const nextColor = playerColors[mySkinIndex + 1] || playerColors[0]
+    const nextColor = PLAYER_COLORS[mySkinIndex + 1] || PLAYER_COLORS[0]
 
     await update(playerRef.current, {
       color: nextColor,
@@ -67,11 +67,10 @@ const Home: NextPage = () => {
   }, [])
 
   // If pressed key is our target key then set to true
-  function keydownFunction({ key }) {
-    if (ARROW_KEYS[key] && keyPressed) {
-      console.log('key down:', key)
-      console.log('ARROW_KEYS:', ARROW_KEYS[key])
+  function keydownFunction({ key }: { key: string }) {
+    if (ARROW_KEYS.hasOwnProperty(key) && keyPressed) {
       // update position
+      ARROW_KEYS
       handleArrowPress(ARROW_KEYS[key].x, ARROW_KEYS[key].y)
       setKeyPressed(false)
     }
@@ -80,15 +79,12 @@ const Home: NextPage = () => {
   async function handleAuth() {
     const signInRes = await signInAnonymously(auth)
 
-    console.log('signInRes', signInRes)
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         //You're logged in!
         playerId.current = user.uid
         const name = createName()
         playerNameInput.current = name
-
-        console.log('playerId.current', playerId.current)
 
         playerRef.current = ref(db, `/players/${playerId.current}`)
 
@@ -98,7 +94,7 @@ const Home: NextPage = () => {
           id: playerId.current,
           name,
           direction: 'right',
-          color: randomFromArray(playerColors),
+          color: randomFromArray(PLAYER_COLORS),
           x,
           y,
           coins: 0,
@@ -114,9 +110,8 @@ const Home: NextPage = () => {
   }
 
   // If released key is our target key then set to false
-  const keyupFunction = ({ key }) => {
+  const keyupFunction = ({ key }: { key: string }) => {
     if (ARROW_KEYS[key]) {
-      console.log('key up:', key)
       setKeyPressed(true)
     }
   }
@@ -187,9 +182,11 @@ const Home: NextPage = () => {
 
       const characterElement = document.createElement('div')
       characterElement.classList.add('Character', 'grid-cell')
+
       if (addedPlayer.id === playerId.current) {
         characterElement.classList.add('you')
       }
+
       characterElement.innerHTML = `
           <div class="Character_shadow grid-cell"></div>
           <div class="Character_sprite grid-cell"></div>
@@ -205,8 +202,10 @@ const Home: NextPage = () => {
       //Fill in some initial state
       characterElement.querySelector('.Character_name').innerText =
         addedPlayer.name
+
       characterElement.querySelector('.Character_coins').innerText =
         addedPlayer.coins
+
       characterElement.setAttribute('data-color', addedPlayer.color)
       characterElement.setAttribute('data-direction', addedPlayer.direction)
       const left = 16 * addedPlayer.x + 'px'
@@ -225,8 +224,8 @@ const Home: NextPage = () => {
 
         // Now update the DOM
         el.querySelector('.Character_name').innerText = characterState.name
-        el.querySelector('.Character_coins').innerText =
-          characterState.coins.current
+        el.querySelector('.Character_coins').innerText = characterState.coins
+
         el.setAttribute('data-color', characterState.color)
         el.setAttribute('data-direction', characterState.direction)
         const left = 16 * characterState.x + 'px'
