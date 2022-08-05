@@ -1,9 +1,14 @@
-import { ANIMAL_LIST, MAP_DATA, PREFIX } from '../common/constants'
+import {
+  ANIMAL_LIST,
+  MAP_DATA,
+  PREFIX,
+  RANDOM_POSITION,
+} from '../common/constants'
 
-export function randomFromArray(array) {
+export function randomFromArray(array: any) {
   return array[Math.floor(Math.random() * array.length)]
 }
-export function getKeyString(x, y) {
+export function getKeyString(x: string, y: string) {
   return `${x}x${y}`
 }
 
@@ -13,7 +18,7 @@ export function createName() {
   return `${prefix} ${animal}`
 }
 
-export function isSolid(x, y) {
+export function isSolid(x: any, y: any) {
   const blockedNextSpace = MAP_DATA.blockedSpaces[getKeyString(x, y)]
 
   return (
@@ -27,29 +32,5 @@ export function isSolid(x, y) {
 
 export function getRandomSafeSpot() {
   //We don't look things up by key here, so just return an x/y
-  return randomFromArray([
-    { x: 1, y: 4 },
-    { x: 2, y: 4 },
-    { x: 1, y: 5 },
-    { x: 2, y: 6 },
-    { x: 2, y: 8 },
-    { x: 2, y: 9 },
-    { x: 4, y: 8 },
-    { x: 5, y: 5 },
-    { x: 5, y: 8 },
-    { x: 5, y: 10 },
-    { x: 5, y: 11 },
-    { x: 11, y: 7 },
-    { x: 12, y: 7 },
-    { x: 13, y: 7 },
-    { x: 13, y: 6 },
-    { x: 13, y: 8 },
-    { x: 7, y: 6 },
-    { x: 7, y: 7 },
-    { x: 7, y: 8 },
-    { x: 8, y: 8 },
-    { x: 10, y: 8 },
-    { x: 8, y: 8 },
-    { x: 11, y: 4 },
-  ])
+  return randomFromArray(RANDOM_POSITION)
 }
