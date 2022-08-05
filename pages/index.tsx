@@ -38,6 +38,7 @@ const Home: NextPage = () => {
   const coins = useRef<any>({})
   const coinElements = useRef<any>({})
 
+  // onMount sign in as anonymous user
   useEffect(() => {
     handleAuth()
   }, [])
@@ -54,7 +55,7 @@ const Home: NextPage = () => {
     })
   }
 
-  // Add event listeners
+  // key press event listeners
   useEffect(() => {
     window.addEventListener('keydown', keydownFunction)
     window.addEventListener('keyup', keyupFunction)
@@ -77,7 +78,7 @@ const Home: NextPage = () => {
   }
 
   async function handleAuth() {
-    const signInRes = await signInAnonymously(auth)
+    await signInAnonymously(auth)
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -138,7 +139,7 @@ const Home: NextPage = () => {
 
   async function handleNameChange(e) {
     const newName = e.target.value || createName()
-    playerNameInput.current.value = newName
+    playerNameInput.current = newName
 
     await update(playerRef.current, {
       name: newName,
@@ -191,8 +192,8 @@ const Home: NextPage = () => {
           <div class="Character_shadow grid-cell"></div>
           <div class="Character_sprite grid-cell"></div>
           <div class="Character_name-container">
-            <span class="Character_name"></span>
-            <span class="Character_coins">0</span>
+            <span class="Character_name">${addedPlayer.name}</span>
+            <span class="Character_coins">${addedPlayer.coins}</span>
           </div>
           <div class="Character_you-arrow"></div>
         `
@@ -200,12 +201,6 @@ const Home: NextPage = () => {
       playerElements.current[addedPlayer.id] = characterElement
 
       //Fill in some initial state
-      characterElement.querySelector('.Character_name').innerText =
-        addedPlayer.name
-
-      characterElement.querySelector('.Character_coins').innerText =
-        addedPlayer.coins
-
       characterElement.setAttribute('data-color', addedPlayer.color)
       characterElement.setAttribute('data-direction', addedPlayer.direction)
       const left = 16 * addedPlayer.x + 'px'
@@ -293,7 +288,12 @@ const Home: NextPage = () => {
       <div className='player-info'>
         <div>
           <label>Your Name</label>
-          <input onChange={handleNameChange} maxLength={10} type='text' />
+          <input
+            value={playerNameInput.current}
+            onChange={handleNameChange}
+            maxLength={10}
+            type='text'
+          />
         </div>
 
         <div>
