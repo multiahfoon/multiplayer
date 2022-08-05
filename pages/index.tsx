@@ -1,28 +1,29 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useEffect, useRef, useState } from 'react'
-
-import { Canvas } from '../components/Canvas'
-import { signInAnonymously, onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth'
 import {
-  ref,
-  set,
-  onDisconnect,
-  onValue,
   onChildAdded,
   onChildRemoved,
-  update,
+  onDisconnect,
+  onValue,
+  ref,
   remove,
+  set,
+  update,
 } from 'firebase/database'
-import { auth, db } from '../firebase'
+
 import {
   createName,
   getKeyString,
   getRandomSafeSpot,
+  isSolid,
   randomFromArray,
 } from '../lib/miscHandlers'
+
+import { auth, db } from '../firebase'
+
 import { ARROW_KEYS, playerColors } from '../common/constants'
-import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
   const gameContainer = useRef<any>() // .game-container
@@ -38,36 +39,7 @@ const Home: NextPage = () => {
   const coinElements = useRef<any>({})
 
   useEffect(() => {
-    signInAnonymously(auth)
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        //You're logged in!
-        playerId.current = user.uid
-        const name = createName()
-        playerNameInput.value = name
-
-        playerRef.current = ref(db, `players/${playerId.current}`)
-
-        const { x, y } = getRandomSafeSpot()
-        set(playerRef.current, {
-          id: playerId.current,
-          name,
-          direction: 'right',
-          color: randomFromArray(playerColors),
-          x,
-          y,
-          coins: 0,
-        })
-
-        //Remove me from Firebase when I disconnect
-        onDisconnect(playerRef.current).remove()
-
-        // ======================================================
-        // Begin the game now that we are signed in
-        initGame()
-      }
-    })
+    handleAuth()
   }, [])
 
   async function handleColorBtnClick() {
@@ -105,6 +77,42 @@ const Home: NextPage = () => {
     }
   }
 
+  async function handleAuth() {
+    const signInRes = await signInAnonymously(auth)
+
+    console.log('signInRes', signInRes)
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        //You're logged in!
+        playerId.current = user.uid
+        const name = createName()
+        playerNameInput.current = name
+
+        console.log('playerId.current', playerId.current)
+
+        playerRef.current = ref(db, `/players/${playerId.current}`)
+
+        const { x, y } = getRandomSafeSpot()
+
+        await set(playerRef.current, {
+          id: playerId.current,
+          name,
+          direction: 'right',
+          color: randomFromArray(playerColors),
+          x,
+          y,
+          coins: 0,
+        })
+
+        //Remove me from Firebase when I disconnect
+        await onDisconnect(playerRef.current).remove()
+
+        // Begin the game now that we are signed in
+        await initGame()
+      }
+    })
+  }
+
   // If released key is our target key then set to false
   const keyupFunction = ({ key }) => {
     if (ARROW_KEYS[key]) {
@@ -114,12 +122,6 @@ const Home: NextPage = () => {
   }
 
   function handleArrowPress(xChange = 0, yChange = 0) {
-    console.log('======================')
-    console.log({ xChange, yChange })
-    console.log({ players })
-    console.log({ playerId })
-    console.log('======================')
-
     const newX = players.current[playerId.current].x + xChange
     const newY = players.current[playerId.current].y + yChange
     if (!isSolid(newX, newY)) {
@@ -139,11 +141,11 @@ const Home: NextPage = () => {
     }
   }
 
-  function handleNameChange(e) {
+  async function handleNameChange(e) {
     const newName = e.target.value || createName()
     playerNameInput.current.value = newName
 
-    update(playerRef.current, {
+    await update(playerRef.current, {
       name: newName,
     })
   }
@@ -197,7 +199,6 @@ const Home: NextPage = () => {
           </div>
           <div class="Character_you-arrow"></div>
         `
-      // console.log('playerElements', playerElements)
 
       playerElements.current[addedPlayer.id] = characterElement
 
@@ -211,11 +212,6 @@ const Home: NextPage = () => {
       const left = 16 * addedPlayer.x + 'px'
       const top = 16 * addedPlayer.y - 4 + 'px'
       characterElement.style.transform = `translate3d(${left}, ${top}, 0)`
-
-      console.log('====================')
-      console.log('gameContainer:', gameContainer)
-      console.log('characterElement:', characterElement)
-      console.log('====================')
 
       gameContainer.current.appendChild(characterElement)
     })
@@ -283,6 +279,7 @@ const Home: NextPage = () => {
       gameContainer.current.removeChild(coinElements.current[keyToRemove])
       delete coinElements.current[keyToRemove]
     })
+    placeCoin()
   }
 
   return (
@@ -292,9 +289,9 @@ const Home: NextPage = () => {
         <meta name='description' content='Generated by create next app' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <Canvas />
-      <div ref={gameContainer} className={styles['game-container']} />
-      <div className={styles['player-info']}>
+
+      <div ref={gameContainer} className='game-container' />
+      <div className='player-info'>
         <div>
           <label>Your Name</label>
           <input onChange={handleNameChange} maxLength={10} type='text' />
