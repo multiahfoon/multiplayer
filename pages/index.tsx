@@ -21,7 +21,7 @@ import {
   randomFromArray,
 } from '../lib/miscHandlers'
 
-import { auth, db } from '../firebase'
+import { auth, database } from '../firebase'
 
 import { ARROW_KEYS, PLAYER_COLORS } from '../common/constants'
 
@@ -87,7 +87,7 @@ const Home: NextPage = () => {
         const name = createName()
         playerNameInput.current = name
 
-        playerRef.current = ref(db, `/players/${playerId.current}`)
+        playerRef.current = ref(database, `/players/${playerId.current}`)
 
         const { x, y } = getRandomSafeSpot()
 
@@ -151,7 +151,7 @@ const Home: NextPage = () => {
 
     if (coins.current[key]) {
       // Remove this key from data, then uptick Player's coin count
-      const coinsRef = ref(db, `coins/${key}`)
+      const coinsRef = ref(database, `coins/${key}`)
 
       await remove(coinsRef)
 
@@ -163,7 +163,7 @@ const Home: NextPage = () => {
 
   function placeCoin() {
     const { x, y } = getRandomSafeSpot()
-    const coinRef = ref(db, `coins/${getKeyString(x, y)}`)
+    const coinRef = ref(database, `coins/${getKeyString(x, y)}`)
 
     set(coinRef, { x, y })
 
@@ -175,8 +175,8 @@ const Home: NextPage = () => {
   }
 
   async function initGame() {
-    const allPlayersRef = ref(db, '/players')
-    const allCoinsRef = ref(db, '/coins')
+    const allPlayersRef = ref(database, '/players')
+    const allCoinsRef = ref(database, '/coins')
 
     onChildAdded(allPlayersRef, (snapshot) => {
       //Fires whenever a new node is added the tree
@@ -238,7 +238,6 @@ const Home: NextPage = () => {
       delete playerElements.current[removedKey]
     })
 
-    // New - not in the video!
     // This block will remove coins.current from local state when Firebase `coins.current` value updates
     onValue(allCoinsRef, (snapshot) => {
       coins.current = snapshot.val() || {}
