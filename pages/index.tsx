@@ -137,7 +137,7 @@ const Home: NextPage = () => {
     }
   }
 
-  async function handleNameChange(e) {
+  async function handleNameChange(e: any) {
     const newName = e.target.value || createName()
     playerNameInput.current = newName
 
@@ -146,9 +146,10 @@ const Home: NextPage = () => {
     })
   }
 
-  async function attemptGrabCoin(x, y) {
+  async function attemptGrabCoin(x: any, y: any) {
     const key = getKeyString(x, y)
-    if (coins[key]) {
+
+    if (coins.current[key]) {
       // Remove this key from data, then uptick Player's coin count
       const coinsRef = ref(db, `coins/${key}`)
 
@@ -273,6 +274,7 @@ const Home: NextPage = () => {
       gameContainer.current.removeChild(coinElements.current[keyToRemove])
       delete coinElements.current[keyToRemove]
     })
+
     placeCoin()
   }
 
