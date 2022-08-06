@@ -26,17 +26,16 @@ import { auth, database } from '../firebase'
 import { ARROW_KEYS, PLAYER_COLORS } from '../common/constants'
 
 const Home: NextPage = () => {
-  const gameContainer = useRef<any>() // .game-container
-  const playerNameInput = useRef<any>() // #player-name
-
   const [keyPressed, setKeyPressed] = useState<boolean>(true)
 
+  const coinElements = useRef<any>({})
+  const coins = useRef<any>({})
+  const gameContainer = useRef<any>() // .game-container
+  const playerElements = useRef<any>({})
   const playerId = useRef<any>()
+  const playerNameInput = useRef<any>() // #player-name
   const playerRef = useRef<any>()
   const players = useRef<any>({})
-  const playerElements = useRef<any>({})
-  const coins = useRef<any>({})
-  const coinElements = useRef<any>({})
 
   // onMount sign in as anonymous user
   useEffect(() => {
@@ -72,8 +71,35 @@ const Home: NextPage = () => {
     if (ARROW_KEYS.hasOwnProperty(key) && keyPressed) {
       // update position
       ARROW_KEYS
-      handleArrowPress(ARROW_KEYS[key].x, ARROW_KEYS[key].y)
+      keyArrowPress(ARROW_KEYS[key].x, ARROW_KEYS[key].y)
       setKeyPressed(false)
+    }
+  }
+
+  // If released key is our target key then set to false
+  const keyupFunction = ({ key }: { key: string }) => {
+    if (ARROW_KEYS[key]) {
+      setKeyPressed(true)
+    }
+  }
+
+  function keyArrowPress(xChange = 0, yChange = 0) {
+    const newX = players.current[playerId.current].x + xChange
+    const newY = players.current[playerId.current].y + yChange
+    if (!isSolid(newX, newY)) {
+      //move to the next space
+      players.current[playerId.current].x = newX
+      players.current[playerId.current].y = newY
+      if (xChange === 1) {
+        players.current[playerId.current].direction = 'right'
+      }
+      if (xChange === -1) {
+        players.current[playerId.current].direction = 'left'
+      }
+
+      set(playerRef.current, players.current[playerId.current])
+
+      attemptGrabCoin(newX, newY)
     }
   }
 
@@ -108,33 +134,6 @@ const Home: NextPage = () => {
         await initGame()
       }
     })
-  }
-
-  // If released key is our target key then set to false
-  const keyupFunction = ({ key }: { key: string }) => {
-    if (ARROW_KEYS[key]) {
-      setKeyPressed(true)
-    }
-  }
-
-  function handleArrowPress(xChange = 0, yChange = 0) {
-    const newX = players.current[playerId.current].x + xChange
-    const newY = players.current[playerId.current].y + yChange
-    if (!isSolid(newX, newY)) {
-      //move to the next space
-      players.current[playerId.current].x = newX
-      players.current[playerId.current].y = newY
-      if (xChange === 1) {
-        players.current[playerId.current].direction = 'right'
-      }
-      if (xChange === -1) {
-        players.current[playerId.current].direction = 'left'
-      }
-
-      set(playerRef.current, players.current[playerId.current])
-
-      attemptGrabCoin(newX, newY)
-    }
   }
 
   async function handleNameChange(e: any) {
