@@ -43,18 +43,6 @@ const Home: NextPage = () => {
     handleAuth()
   }, [])
 
-  async function handleColorBtnClick() {
-    const mySkinIndex = PLAYER_COLORS.indexOf(
-      players.current[playerId.current].color
-    )
-
-    const nextColor = PLAYER_COLORS[mySkinIndex + 1] || PLAYER_COLORS[0]
-
-    await update(playerRef.current, {
-      color: nextColor,
-    })
-  }
-
   // key press event listeners
   useEffect(() => {
     window.addEventListener('keydown', keydownFunction)
@@ -66,6 +54,18 @@ const Home: NextPage = () => {
       window.removeEventListener('keyup', keyupFunction)
     }
   }, [])
+
+  async function handleColorBtnClick() {
+    const mySkinIndex = PLAYER_COLORS.indexOf(
+      players.current[playerId.current].color
+    )
+
+    const nextColor = PLAYER_COLORS[mySkinIndex + 1] || PLAYER_COLORS[0]
+
+    await update(playerRef.current, {
+      color: nextColor,
+    })
+  }
 
   // If pressed key is our target key then set to true
   function keydownFunction({ key }: { key: string }) {
@@ -151,11 +151,9 @@ const Home: NextPage = () => {
 
     if (coins.current[key]) {
       // Remove this key from data, then uptick Player's coin count
-      const coinsRef = ref(database, `coins/${key}`)
+      await remove(ref(database, `coins/${key}`))
 
-      await remove(coinsRef)
-
-      await update(coinsRef, {
+      await update(playerRef.current, {
         coins: players.current[playerId.current].coins + 1,
       })
     }
