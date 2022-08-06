@@ -158,11 +158,11 @@ const Home: NextPage = () => {
     }
   }
 
-  function placeCoin() {
+  async function placeCoin() {
     const { x, y } = getRandomSafeSpot()
     const coinRef = ref(database, `coins/${getKeyString(x, y)}`)
 
-    set(coinRef, { x, y })
+    await set(coinRef, { x, y })
 
     const coinTimeouts = [2000, 3000, 4000, 5000]
 
