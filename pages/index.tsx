@@ -24,6 +24,8 @@ import {
 import { auth, database } from '../firebase'
 
 import { ARROW_KEYS, PLAYER_COLORS } from '../common/constants'
+import { playerIdState } from '../atoms/playerIdAtom'
+import { useRecoilState } from 'recoil'
 
 const Home: NextPage = () => {
   const [keyPressed, setKeyPressed] = useState<boolean>(true)
@@ -32,9 +34,9 @@ const Home: NextPage = () => {
   const coins = useRef<any>({})
   const gameContainer = useRef<any>() // .game-container
   const playerElements = useRef<any>({})
-  const playerId = useRef<any>()
   const playerNameInput = useRef<any>() // #player-name
   const players = useRef<any>({})
+  const [playerId, setPlayerId] = useRecoilState(playerIdState)
 
   // onMount sign in as anonymous user
   useEffect(() => {
@@ -54,11 +56,9 @@ const Home: NextPage = () => {
   }, [])
 
   async function handleColorBtnClick() {
-    const playerRef = ref(database, `/players/${playerId.current}`)
+    const playerRef = ref(database, `/players/${playerId}`)
 
-    const mySkinIndex = PLAYER_COLORS.indexOf(
-      players.current[playerId.current].color
-    )
+    const mySkinIndex = PLAYER_COLORS.indexOf(players.current[playerId].color)
 
     const nextColor = PLAYER_COLORS[mySkinIndex + 1] || PLAYER_COLORS[0]
 
@@ -85,22 +85,22 @@ const Home: NextPage = () => {
   }
 
   function keyArrowPress(xChange = 0, yChange = 0) {
-    const playerRef = ref(database, `/players/${playerId.current}`)
+    const playerRef = ref(database, `/players/${playerId}`)
 
-    const newX = players.current[playerId.current].x + xChange
-    const newY = players.current[playerId.current].y + yChange
+    const newX = players.current[playerId].x + xChange
+    const newY = players.current[playerId].y + yChange
     if (!isSolid(newX, newY)) {
       //move to the next space
-      players.current[playerId.current].x = newX
-      players.current[playerId.current].y = newY
+      players.current[playerId].x = newX
+      players.current[playerId].y = newY
       if (xChange === 1) {
-        players.current[playerId.current].direction = 'right'
+        players.current[playerId].direction = 'right'
       }
       if (xChange === -1) {
-        players.current[playerId.current].direction = 'left'
+        players.current[playerId].direction = 'left'
       }
 
-      set(playerRef, players.current[playerId.current])
+      set(playerRef, players.current[playerId])
 
       attemptGrabCoin(newX, newY)
     }
@@ -112,16 +112,18 @@ const Home: NextPage = () => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         //You're logged in!
-        playerId.current = user.uid
+        const id = user.uid
+        setPlayerId(id)
+
         const name = createName()
         playerNameInput.current = name
 
-        const playerRef = ref(database, `/players/${playerId.current}`)
+        const playerRef = ref(database, `/players/${id}`)
 
         const { x, y } = getRandomSafeSpot()
 
         await set(playerRef, {
-          id: playerId.current,
+          id,
           name,
           direction: 'right',
           color: randomFromArray(PLAYER_COLORS),
@@ -140,7 +142,7 @@ const Home: NextPage = () => {
   }
 
   async function handleNameChange(e: any) {
-    const playerRef = ref(database, `/players/${playerId.current}`)
+    const playerRef = ref(database, `/players/${playerId}`)
 
     const newName = e.target.value || createName()
     playerNameInput.current = newName
@@ -154,13 +156,13 @@ const Home: NextPage = () => {
     const key = getKeyString(x, y)
 
     if (coins.current[key]) {
-      const playerRef = ref(database, `/players/${playerId.current}`)
+      const playerRef = ref(database, `/players/${playerId}`)
 
       // Remove this key from data, then uptick Player's coin count
       await remove(ref(database, `coins/${key}`))
 
       await update(playerRef, {
-        coins: players.current[playerId.current].coins + 1,
+        coins: players.current[playerId].coins + 1,
       })
     }
   }
@@ -189,7 +191,7 @@ const Home: NextPage = () => {
       const characterElement = document.createElement('div')
       characterElement.classList.add('Character', 'grid-cell')
 
-      if (addedPlayer.id === playerId.current) {
+      if (addedPlayer.id === playerId) {
         characterElement.classList.add('you')
       }
 
