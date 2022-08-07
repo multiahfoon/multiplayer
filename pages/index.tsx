@@ -34,7 +34,6 @@ const Home: NextPage = () => {
   const playerElements = useRef<any>({})
   const playerId = useRef<any>()
   const playerNameInput = useRef<any>() // #player-name
-  const playerRef = useRef<any>()
   const players = useRef<any>({})
 
   // onMount sign in as anonymous user
@@ -55,13 +54,15 @@ const Home: NextPage = () => {
   }, [])
 
   async function handleColorBtnClick() {
+    const playerRef = ref(database, `/players/${playerId.current}`)
+
     const mySkinIndex = PLAYER_COLORS.indexOf(
       players.current[playerId.current].color
     )
 
     const nextColor = PLAYER_COLORS[mySkinIndex + 1] || PLAYER_COLORS[0]
 
-    await update(playerRef.current, {
+    await update(playerRef, {
       color: nextColor,
     })
   }
@@ -84,6 +85,8 @@ const Home: NextPage = () => {
   }
 
   function keyArrowPress(xChange = 0, yChange = 0) {
+    const playerRef = ref(database, `/players/${playerId.current}`)
+
     const newX = players.current[playerId.current].x + xChange
     const newY = players.current[playerId.current].y + yChange
     if (!isSolid(newX, newY)) {
@@ -97,7 +100,7 @@ const Home: NextPage = () => {
         players.current[playerId.current].direction = 'left'
       }
 
-      set(playerRef.current, players.current[playerId.current])
+      set(playerRef, players.current[playerId.current])
 
       attemptGrabCoin(newX, newY)
     }
@@ -113,11 +116,11 @@ const Home: NextPage = () => {
         const name = createName()
         playerNameInput.current = name
 
-        playerRef.current = ref(database, `/players/${playerId.current}`)
+        const playerRef = ref(database, `/players/${playerId.current}`)
 
         const { x, y } = getRandomSafeSpot()
 
-        await set(playerRef.current, {
+        await set(playerRef, {
           id: playerId.current,
           name,
           direction: 'right',
@@ -128,7 +131,7 @@ const Home: NextPage = () => {
         })
 
         //Remove me from Firebase when I disconnect
-        await onDisconnect(playerRef.current).remove()
+        await onDisconnect(playerRef).remove()
 
         // Begin the game now that we are signed in
         await initGame()
@@ -137,10 +140,12 @@ const Home: NextPage = () => {
   }
 
   async function handleNameChange(e: any) {
+    const playerRef = ref(database, `/players/${playerId.current}`)
+
     const newName = e.target.value || createName()
     playerNameInput.current = newName
 
-    await update(playerRef.current, {
+    await update(playerRef, {
       name: newName,
     })
   }
@@ -149,10 +154,12 @@ const Home: NextPage = () => {
     const key = getKeyString(x, y)
 
     if (coins.current[key]) {
+      const playerRef = ref(database, `/players/${playerId.current}`)
+
       // Remove this key from data, then uptick Player's coin count
       await remove(ref(database, `coins/${key}`))
 
-      await update(playerRef.current, {
+      await update(playerRef, {
         coins: players.current[playerId.current].coins + 1,
       })
     }
