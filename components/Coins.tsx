@@ -3,7 +3,7 @@ import {
   onChildRemoved,
   onValue,
   ref,
-  set,
+  update,
 } from 'firebase/database'
 import React, { useEffect } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
@@ -61,7 +61,7 @@ export function Coins() {
     const coinRef = ref(database, `coins/${getKeyString(x, y)}`)
     const coinTimeouts = [2000, 3000, 4000, 5000]
 
-    await set(coinRef, { x, y })
+    await update(coinRef, { x, y })
 
     setTimeout(() => {
       placeCoin()
