@@ -30,10 +30,10 @@ import { Coins as CoinsType } from '../types'
 
 const Home: NextPage = () => {
   const [, setPlayerName] = useRecoilState<any>(playerNameState)
-  const [keyPressed, setKeyPressed] = useState<boolean>(true)
   const [playerId, setPlayerId] = useRecoilState<any>(playerIdState)
   const [players, setPlayers] = useRecoilState<any>(playersState)
   const coins = useRecoilValue<CoinsType>(coinsState)
+  const keyPressed = useRef<boolean>(true)
 
   // onMount sign in as anonymous user
   useEffect(() => {
@@ -57,34 +57,33 @@ const Home: NextPage = () => {
     if (ARROW_KEYS.hasOwnProperty(key) && keyPressed) {
       await arrowKeyPress(ARROW_KEYS[key].x, ARROW_KEYS[key].y)
 
-      setKeyPressed(false)
+      keyPressed.current = false
     }
   }
 
   function keyUp({ key }: { key: string }) {
     if (ARROW_KEYS[key]) {
-      setKeyPressed(true)
+      keyPressed.current = true
     }
   }
 
   async function arrowKeyPress(xChange = 0, yChange = 0) {
-    const newX = Number(players[playerId].x) + xChange
-    const newY = Number(players[playerId].y) + yChange
+    const newX = players[playerId].x + xChange
+    const newY = players[playerId].y + yChange
 
     if (!isSolid(newX, newY)) {
       const newPosition = {
-        ...players[playerId],
         x: newX,
         y: newY,
         direction: xChange === 1 ? 'right' : 'left',
       }
 
-      await set(ref(database, `/players/${playerId}`), newPosition)
-
       setPlayers({
         ...players,
         [playerId]: newPosition,
       })
+
+      await update(ref(database, `/players/${playerId}`), newPosition)
 
       await attemptGrabCoin(newX, newY)
     }
@@ -95,9 +94,11 @@ const Home: NextPage = () => {
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // user successfully logged in
+        // If user successfully logged in
+        // Post initial player data
         const id = user.uid
         const name = createName()
+
         const playerRef = ref(database, `/players/${id}`)
 
         const { x, y } = getRandomSafeSpot()
@@ -125,13 +126,11 @@ const Home: NextPage = () => {
     const key = getKeyString(x, y)
 
     if (coins[key]) {
-      const playerRef = ref(database, `/players/${playerId}`)
-
-      // Remove this key from data, then uptick Player's coin count
+      // If player position equal to coin position
+      // Remove coin from current game session
       await remove(ref(database, `coins/${key}`))
-
-      await update(playerRef, {
-        ...players[playerId],
+      // Update player coin count
+      await update(ref(database, `/players/${playerId}`), {
         coins: players[playerId].coins + 1,
       })
     }
