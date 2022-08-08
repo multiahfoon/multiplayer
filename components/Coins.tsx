@@ -60,12 +60,13 @@ export function Coins() {
   async function placeCoin() {
     const { x, y } = getRandomSafeSpot()
     const coinRef = ref(database, `coins/${getKeyString(x, y)}`)
+
     const coinTimeouts = [2000, 3000, 4000, 5000]
 
     await update(coinRef, { x, y })
 
-    setTimeout(() => {
-      placeCoin()
+    setTimeout(async () => {
+      await placeCoin()
     }, randomFromArray(coinTimeouts))
   }
 
