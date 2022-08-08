@@ -40,7 +40,8 @@ export function Coins() {
       const coin = snapshot.val()
       const key = getKeyString(coin.x, coin.y)
 
-      const newCoin = { [key]: true }
+      const newCoin = { [key]: { x: coin.x, y: coin.y } }
+
       setCoins({ ...coins, ...newCoin })
     })
 
