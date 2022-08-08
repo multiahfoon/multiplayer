@@ -43,6 +43,10 @@ const Home: NextPage = () => {
     handleAuth()
   }, [])
 
+  useEffect(() => {
+    if (playerId) initGame()
+  }, [playerId])
+
   // key press event listeners
   useEffect(() => {
     window.addEventListener('keydown', keydownFunction)
@@ -136,7 +140,6 @@ const Home: NextPage = () => {
         await onDisconnect(playerRef).remove()
 
         // Begin the game now that we are signed in
-        await initGame()
       }
     })
   }
