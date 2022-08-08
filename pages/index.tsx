@@ -4,7 +4,7 @@ import type { NextPage } from 'next'
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth'
 import { onDisconnect, ref, remove, set, update } from 'firebase/database'
 import { useEffect, useRef, useState } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 
 import { auth, database } from '../firebase'
 
@@ -25,13 +25,15 @@ import { Coins } from '../components/Coins'
 import { PlayerColorBtn } from '../components/PlayerColorBtn'
 import { PlayerNameInput } from '../components/PlayerNameInput'
 import { Players } from '../components/Players'
+import { coinsState } from '../atoms/coinsAtom'
+import { Coins as CoinsType } from '../types'
 
 const Home: NextPage = () => {
   const [, setPlayerName] = useRecoilState<any>(playerNameState)
   const [keyPressed, setKeyPressed] = useState<boolean>(true)
-  const coins = useRef<any>({})
   const [playerId, setPlayerId] = useRecoilState<any>(playerIdState)
   const [players, setPlayers] = useRecoilState<any>(playersState)
+  const coins = useRecoilValue<CoinsType>(coinsState)
 
   // onMount sign in as anonymous user
   useEffect(() => {
@@ -122,13 +124,14 @@ const Home: NextPage = () => {
   async function attemptGrabCoin(x: any, y: any) {
     const key = getKeyString(x, y)
 
-    if (coins.current[key]) {
+    if (coins[key]) {
       const playerRef = ref(database, `/players/${playerId}`)
 
       // Remove this key from data, then uptick Player's coin count
       await remove(ref(database, `coins/${key}`))
 
       await update(playerRef, {
+        ...players[playerId],
         coins: players[playerId].coins + 1,
       })
     }
@@ -144,6 +147,7 @@ const Home: NextPage = () => {
 
       <div className='game-container'>
         <Players />
+        <Coins />
       </div>
 
       <div className='player-info'>
