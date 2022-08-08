@@ -7,12 +7,11 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: linear-gradient(
-    180deg,
-    #64beff -50%,
-    #6e96ff 69.71%,
-    #2a65ff 150%
-  );
+  background: url('./images/water.png') center center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
   font-family: 'Source Sans Pro', sans-serif;
   display: flex;
   align-items: center;
@@ -63,6 +62,7 @@ button:active {
   width: 240px;
   height: 208px;
   background: url('./images/map.png') no-repeat no-repeat;
+  box-shadow: 0 0 8px 8px 0 inset;
   transform: scale(3);
   image-rendering: pixelated;
 }
