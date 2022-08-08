@@ -12,10 +12,9 @@ export function Player({ coins, color, direction, id, name, x, y }: Player) {
 
   return (
     <div
-      className={`Character grid-cell ${uuid === playerId ? 'you' : ''}
-          data-color=${color}
-          data-direction=${direction}
-          `}
+      className={`Character grid-cell ${uuid === playerId ? 'you' : ''}`}
+      data-color={color}
+      data-direction={direction}
       style={{ transform: `translate3d(${16 * x}px,${16 * y - 4}px,0)` }}
     >
       <div className='Character_shadow grid-cell' />
