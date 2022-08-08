@@ -3,16 +3,19 @@ import React from 'react'
 import { database } from '../firebase'
 import { onChildAdded, onChildRemoved, onValue, ref } from 'firebase/database'
 import { useEffect } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 
 import { playersState } from '../atoms/playersAtom'
 
 import { Player } from './Player'
+import { playerIdState } from '../atoms/playerIdAtom'
 
 export function Players() {
   const [players, setPlayers] = useRecoilState<any>(playersState)
+  const playerId = useRecoilValue<any>(playerIdState)
 
   useEffect(() => {
+    if (!playerId) return
     const allPlayersRef = ref(database, '/players')
 
     // listener for when a player joins the game
@@ -24,16 +27,16 @@ export function Players() {
       })
     })
 
-    // listener for when players values change. E.g. score, name or color
-    onValue(allPlayersRef, (snapshot) => setPlayers(snapshot.val()))
-
     // listener for when players leaves the game
     onChildRemoved(allPlayersRef, (snapshot) => {
       const { [snapshot.val().id]: removedPlayer, ...everyoneElse } = players
 
       setPlayers(everyoneElse)
     })
-  }, [])
+
+    // listener for when player values change. E.g. score, name or color
+    onValue(allPlayersRef, (snapshot) => setPlayers(snapshot.val()))
+  }, [playerId])
 
   return (
     <>
