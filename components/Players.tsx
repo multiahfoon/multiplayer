@@ -20,7 +20,7 @@ export function Players() {
       const newPlayer = snapshot.val()
       setPlayers({
         ...players,
-        newPlayer,
+        [newPlayer.id]: newPlayer,
       })
     })
 
@@ -37,21 +37,22 @@ export function Players() {
 
   return (
     <>
-      {players &&
-        Object.keys(players).forEach((key) => {
-          return (
-            <Player
-              key={key}
-              coins={players[key].coins}
-              color={players[key].color}
-              direction={players[key].direction}
-              id={players[key].id}
-              name={players[key].name}
-              x={players[key].x}
-              y={players[key].y}
-            />
-          )
-        })}
+      {players ? (
+        Object.keys(players).map((key) => (
+          <Player
+            coins={players[key].coins}
+            color={players[key].color}
+            direction={players[key].direction}
+            id={players[key].id}
+            key={key}
+            name={players[key].name}
+            x={players[key].x}
+            y={players[key].y}
+          />
+        ))
+      ) : (
+        <div></div>
+      )}
     </>
   )
 }
