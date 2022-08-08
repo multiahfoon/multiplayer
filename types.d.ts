@@ -1,5 +1,9 @@
 import { Attributes } from 'react'
 
+export interface Coins {
+  [key: string]: boolean
+}
+
 export type tBlockSpaces = {
   [key: string]: boolean
 }
