@@ -54,7 +54,7 @@ export function Players() {
           />
         ))
       ) : (
-        <div></div>
+        <></>
       )}
     </>
   )
