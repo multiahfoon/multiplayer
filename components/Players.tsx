@@ -25,11 +25,12 @@ export function Players() {
     })
 
     // listener for when players values change. E.g. score, name or color
-    onValue(allPlayersRef, (snapshot) => setPlayers(snapshot.val() || {}))
+    onValue(allPlayersRef, (snapshot) => setPlayers(snapshot.val()))
 
     // listener for when players leaves the game
     onChildRemoved(allPlayersRef, (snapshot) => {
       const { [snapshot.val().id]: removedPlayer, ...everyoneElse } = players
+
       setPlayers(everyoneElse)
     })
   }, [])
