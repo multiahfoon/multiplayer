@@ -19,11 +19,15 @@ import {
 
 import { Coin } from './Coin'
 
+import { Coins } from '../types'
+
 export function Coins() {
-  const [coins, setCoins] = useRecoilState<any>(coinsState)
+  const [coins, setCoins] = useRecoilState<Coins>(coinsState)
   const playerId = useRecoilValue(playerIdState)
 
   useEffect(() => {
+    if (!playerId) return
+
     const allCoinsRef = ref(database, '/coins')
 
     // listener for when coins value change
@@ -49,8 +53,8 @@ export function Coins() {
       setCoins(leftOverCoins)
     })
 
-    if (playerId) placeCoin()
-  }, [])
+    placeCoin()
+  }, [playerId])
 
   async function placeCoin() {
     const { x, y } = getRandomSafeSpot()
@@ -66,10 +70,13 @@ export function Coins() {
 
   return (
     <>
-      {coins &&
-        Object.keys(coins).forEach((key) => (
-          <Coin x={16 * coins[key].x} y={16 * coins[key].y - 4} />
-        ))}
+      {coins ? (
+        Object.keys(coins).map((key) => (
+          <Coin key={key} x={16 * coins[key].x} y={16 * coins[key].y - 4} />
+        ))
+      ) : (
+        <></>
+      )}
     </>
   )
 }
