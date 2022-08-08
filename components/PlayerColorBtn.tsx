@@ -8,7 +8,6 @@ import { database } from '../firebase'
 
 export function PlayerColorBtn() {
   const playerId = useRecoilValue<any>(playerIdState)
-  const playerName = useRef<string>('')
   const players = useRecoilValue<any>(playersState)
 
   async function handleColorBtnClick() {
