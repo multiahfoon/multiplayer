@@ -10,3 +10,5 @@ A multiplayer game where you collect coins.
 - Nextjs
 - Nodejs
 - Firebase
+
+[Project Demo](https://multiplayer-theta.vercel.app/)
