@@ -19,8 +19,7 @@ export function PlayerNameInput() {
   }
 
   return (
-    <div>
-      <label>Your Name</label>
+    <div className='name-input'>
       <input
         value={playerName}
         onChange={handleNameChange}

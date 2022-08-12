@@ -23,7 +23,7 @@ export function PlayerColorBtn() {
   }
 
   return (
-    <div>
+    <div className='color-input'>
       <button onClick={handleColorBtnClick}>Change Color</button>
     </div>
   )
