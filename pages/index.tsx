@@ -143,13 +143,16 @@ const Home: NextPage = () => {
         <meta name='description' content='Multiplayer' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-
       <div className='game-container'>
         <Players />
         <Coins />
       </div>
 
       <div className='player-info'>
+        <div className='notice'>
+          <p>Share the link to invite a friend</p>
+          <p>multiplayer-theta.vercel.app</p>
+        </div>
         <PlayerNameInput />
         <PlayerColorBtn />
       </div>
